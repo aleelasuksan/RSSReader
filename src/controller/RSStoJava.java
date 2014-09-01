@@ -13,14 +13,18 @@ import model.Item;
 import model.RSS;
 
 /**
- * 
- * @author Atit Leelasuksan
+ * The Converter Class, convert RSS XML to Java data via JAXB.
+ * @author Atit Leelasuksan 5510546221
  *
  */
 public class RSStoJava {
 
+	/** Unmarshaller  */
 	private Unmarshaller unm;
 	
+	/**
+	 * A Constructor to create JAXBContext and initialize unmarshaller.
+	 */
 	public RSStoJava() {
 		try {
 			JAXBContext context = JAXBContext.newInstance( RSS.class, Channel.class, Item.class );
@@ -30,6 +34,13 @@ public class RSStoJava {
 		}
 	}
 	
+	/**
+	 * Unmarshall given url from RSS to Java data.
+	 * @param url to unmarshal
+	 * @return RSS class that contain data from url
+	 * @throws JAXBException
+	 * @throws MalformedURLException
+	 */
 	public RSS unmarshal(String url) throws JAXBException, MalformedURLException {
 		URL uri = new URL(url);
 		return (RSS)unm.unmarshal(uri);
