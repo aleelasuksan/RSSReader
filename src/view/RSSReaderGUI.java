@@ -4,11 +4,14 @@ import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.List;
 
 import javax.swing.BoxLayout;
 import javax.swing.DefaultListModel;
+import javax.swing.JEditorPane;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JScrollPane;
@@ -29,10 +32,13 @@ public class RSSReaderGUI {
 
 	private JFrame frame = new JFrame("RSS Reader");
 	private RSS rss;
+	private JEditorPane pane = new JEditorPane();
 	
 	public RSSReaderGUI() throws MalformedURLException, JAXBException {
 		RSStoJava converter = new RSStoJava();
 		rss = converter.unmarshal("http://feeds.bbci.co.uk/news/rss.xml");
+		pane.setEditorKit(JEditorPane.createEditorKitForContentType("text/html"));
+		pane.setEditable(false);
 		initComponent();
 	}
 	
@@ -61,22 +67,25 @@ public class RSSReaderGUI {
 			group.add(label2);
 			jlist.add(label);
 		}*/
-		jlist.addListSelectionListener(new ListSelectionListener() {
-			
-			@Override
-			public void valueChanged(ListSelectionEvent e) {
-				// TODO Auto-generated method stub
-				
-			}
-		});
 		JScrollPane scroll = new JScrollPane(jlist);
 		c.gridy = 2;
 		frame.add(scroll,c);
 		c.gridx = GridBagConstraints.RELATIVE;
-		JTextArea textarea = new JTextArea();
-		textarea.setPreferredSize(new Dimension(100,180));
-		frame.add(textarea,c);
-		frame.setPreferredSize(new Dimension(600,400));
+		pane.setPreferredSize(new Dimension(100,180));
+		JScrollPane scrollForPane = new JScrollPane(pane);
+		frame.add(scrollForPane,c);
+		jlist.addListSelectionListener(new ListSelectionListener() {
+			
+			@Override
+			public void valueChanged(ListSelectionEvent e) {
+				try {
+					updateTextArea(((JList)e.getSource()).getSelectedIndex());
+				} catch (IOException e1) {
+					e1.printStackTrace();
+				}
+			}
+		});
+		frame.setSize(800,600);
 		frame.setVisible(true);
 	}
 	
@@ -86,5 +95,13 @@ public class RSSReaderGUI {
 			list.addElement(item.getTitle());
 		}
 		return list;
+	}
+	
+	public void updateTextArea(int index) throws IOException {
+		List<Item> items = rss.getChannel().getItemList();
+		Item item = items.get(index);
+		System.out.println(item.getLink());
+		URL url = new URL(item.getLink());
+		pane.setText(item.getTitle()+"<br>"+item.getDescription());
 	}
 }
