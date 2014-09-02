@@ -199,6 +199,9 @@ public class RSSReaderGUI {
 		}
 	}
 	
+	/**
+	 * made pane clickable to open url from selected index of feed list.
+	 */
 	public void makePaneClickable() {
 		pane.setCursor(new Cursor(Cursor.HAND_CURSOR));
 		pane.addMouseListener(new MouseAdapter() {
