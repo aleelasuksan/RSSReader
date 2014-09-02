@@ -1,12 +1,22 @@
 package view;
 
 import java.awt.Container;
+import java.awt.Cursor;
+import java.awt.Desktop;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.List;
 import javax.swing.BoxLayout;
@@ -24,8 +34,12 @@ import model.Item;
 import model.RSS;
 import controller.RSStoJava;
 import javax.swing.JFrame;
+import javax.swing.event.HyperlinkEvent;
+import javax.swing.event.HyperlinkListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import javax.swing.text.html.HTMLDocument;
+import javax.swing.text.html.HTMLFrameHyperlinkEvent;
 
 /**
  * A GUI class for RSS Reader.
@@ -90,11 +104,21 @@ public class RSSReaderGUI {
 			
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				unmarshal(text.getText());
+				if(text.getText()!=null)
+					unmarshal(text.getText());
+			}
+		});
+		text.addKeyListener(new KeyAdapter() {
+			
+			@Override
+			public void keyPressed(KeyEvent e) {
+				if(e.getKeyCode() == KeyEvent.VK_ENTER) {
+					fetchButton.doClick();
+				}
 			}
 		});
 		titleContainer = new Container();
-		titleContainer.setLayout(new FlowLayout(FlowLayout.LEADING, 20, 20));
+		titleContainer.setLayout(new FlowLayout(FlowLayout.CENTER, 20, 20));
 		titleContainer.add(prog);
 		titleContainer.add(text);
 		titleContainer.add(fetchButton);
@@ -118,16 +142,18 @@ public class RSSReaderGUI {
 		});
 		listScroller = new JScrollPane(feedList);
 		frame.add(listScroller);
-		listScroller.setPreferredSize(new Dimension(390,400));
+		listScroller.setPreferredSize(new Dimension(500,400));
 		paneScroller = new JScrollPane(pane);
-		paneScroller.setPreferredSize(new Dimension(390,400));
+		paneScroller.setPreferredSize(new Dimension(500,400));
 		contentContainer = new Container();
 		contentContainer.setLayout(new FlowLayout(FlowLayout.CENTER, 0, 0));
 		contentContainer.add(listScroller);
 		contentContainer.add(paneScroller);
+		makePaneClickable();
 		frame.add(contentContainer);
-		frame.setSize(800,600);
-		frame.setPreferredSize(new Dimension(800,600));
+		frame.setSize(1024,600);
+		frame.setPreferredSize(new Dimension(1024,600));
+		frame.pack();
 		frame.setVisible(true);
 	}
 	
@@ -138,7 +164,6 @@ public class RSSReaderGUI {
 	public ListModel<String> getItemArray() {
 		DefaultListModel<String> list = new DefaultListModel<String>();
 		for(Item item : rss.getChannel().getItemList()) {
-			
 			list.addElement(item.getTitle());
 		}
 		return list;
@@ -152,10 +177,38 @@ public class RSSReaderGUI {
 	public void updateItemDetail(int index) throws IOException {
 		List<Item> items = rss.getChannel().getItemList();
 		Item item = items.get(index);
-		URL url = new URL(item.getLink());
-		pane.setPage(url);
+		//pane.setPage(new URL(item.getLink()));
+		pane.setText(String.format("<FONT size =\"30\"><B><U>%s</B></U></FONT><br><br>Publish Date: %s<br><br>%s<br><br><HTML><FONT size=\"16\" color=\"#000099\"><U>Click to visit website.</U></FONT></HTML>", item.getTitle(), item.getPubDate(), item.getDescription()));
 	}
 	
+	/**
+	 * Open Link in Browser.
+	 * @param index of item to open a link.
+	 */
+	public void openURL(int index) {
+		if(index>-1) {
+			if(Desktop.isDesktopSupported()) {
+				try {
+					Desktop.getDesktop().browse(new URI(rss.getChannel().getItemList().get(index).getLink()));
+				} catch (IOException e) {
+					e.printStackTrace();
+				} catch (URISyntaxException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+	}
+	
+	public void makePaneClickable() {
+		pane.setCursor(new Cursor(Cursor.HAND_CURSOR));
+		pane.addMouseListener(new MouseAdapter() {
+
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				openURL(feedList.getSelectedIndex());
+			}
+		});
+	}
 	/**
 	 * unmarshal RSS to Java.
 	 * @param url to unmarshal.
