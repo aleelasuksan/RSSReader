@@ -142,9 +142,9 @@ public class RSSReaderGUI {
 		});
 		listScroller = new JScrollPane(feedList);
 		frame.add(listScroller);
-		listScroller.setPreferredSize(new Dimension(500,400));
+		listScroller.setPreferredSize(new Dimension(350,400));
 		paneScroller = new JScrollPane(pane);
-		paneScroller.setPreferredSize(new Dimension(500,400));
+		paneScroller.setPreferredSize(new Dimension(650,400));
 		contentContainer = new Container();
 		contentContainer.setLayout(new FlowLayout(FlowLayout.CENTER, 0, 0));
 		contentContainer.add(listScroller);
@@ -178,7 +178,7 @@ public class RSSReaderGUI {
 		List<Item> items = rss.getChannel().getItemList();
 		Item item = items.get(index);
 		//pane.setPage(new URL(item.getLink()));
-		pane.setText(String.format("<FONT size =\"30\"><B><U>%s</B></U></FONT><br><br>Publish Date: %s<br><br>%s<br><br><HTML><FONT size=\"16\" color=\"#000099\"><U>Click to visit website.</U></FONT></HTML>", item.getTitle(), item.getPubDate(), item.getDescription()));
+		pane.setText(String.format("<FONT size =\"26\"><B><U>%s</B></U></FONT><br><br>Publish Date: %s<br><br>%s<br><br><HTML><FONT size=\"16\" color=\"#000099\"><U>Click to visit website.</U></FONT></HTML>", item.getTitle(), item.getPubDate(), item.getDescription()));
 	}
 	
 	/**
